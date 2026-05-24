@@ -1,0 +1,38 @@
+const BookListRow = ({ book, onClick }) => {
+  const getGenreClass = (g) => {
+    if (!g) return '';
+    const key = g.toLowerCase().replace(' ', '-');
+    return `gc-${key}`;
+  };
+
+  const getStatusText = () => {
+    switch(book.status) {
+      case 'read': return '✓ Read';
+      case 'reading': return '👁 Reading';
+      case 'want': return '🔖 Want to Read';
+      case 'lent': return '↗ Lent Out';
+      default: return '';
+    }
+  };
+
+  return (
+    <div className="list-row" onClick={() => onClick(book)}>
+      <div className={`list-cover bc-${book.coverColor || 0}`}></div>
+      <div className="list-info">
+        <div className="list-title">{book.title}</div>
+        <div className="list-author">{book.author}</div>
+        <div className={`list-genre ${getGenreClass(book.genre)}`}>{book.genre || 'Other'}</div>
+      </div>
+      <div className="list-meta">
+        <div className="list-status">{getStatusText()}</div>
+        <div className="card-rating" style={{justifyContent: 'flex-end', marginTop: 4}}>
+          {Array.from({length:5}).map((_,i) => (
+            <span key={i} className={`star ${i < (book.rating||0) ? '' : 'empty'}`}>★</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BookListRow;
