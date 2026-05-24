@@ -75,7 +75,7 @@ const Library = ({ books, fetchBooks, fetchActivities, showToast, layout, search
       
       <div className="filter-row">
         <button className={`chip ${activeGenre === 'all' ? 'active' : ''}`} onClick={() => setActiveGenre('all')}>All</button>
-        {['Fiction', 'Non-Fiction', 'Mystery', 'Sci-Fi', 'Biography', 'History'].map(g => (
+        {['Fiction', 'Non-Fiction', 'Mystery', 'Sci-Fi', 'Biography', 'History', 'Education'].map(g => (
           <button 
             key={g} 
             className={`chip genre-${g.toLowerCase()} ${activeGenre === g ? 'active' : ''}`}

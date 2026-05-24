@@ -169,6 +169,7 @@ export const AddBookModal = ({ isOpen, onClose, onAdd }) => {
                 <option value="History">History</option>
                 <option value="Romance">Romance</option>
                 <option value="Thriller">Thriller</option>
+                <option value="Education">Education</option>
                 <option value="Other">Other</option>
               </select>
             </div>

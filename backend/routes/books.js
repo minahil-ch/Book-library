@@ -30,6 +30,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json(savedBook);
   } catch (err) {
+    console.error('Error adding book:', err);
     res.status(400).json({ error: err.message });
   }
 });

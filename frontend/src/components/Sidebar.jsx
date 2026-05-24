@@ -9,7 +9,7 @@ const Sidebar = ({ books, activePath }) => {
   return (
     <nav id="sidebar">
       <div className="sidebar-logo">
-        <div className="logo-mark">Folio</div>
+        <div className="logo-mark">Minahil</div>
         <div className="logo-sub">Personal Library</div>
       </div>
       <div className="sidebar-stats">
