@@ -15,10 +15,12 @@ router.get('/', async (req, res) => {
 
 // Add a new book
 router.post('/', async (req, res) => {
+  console.log('POST /api/books - Body:', req.body);
   try {
     const coverColor = Math.floor(Math.random() * 10);
     const newBook = new Book({ ...req.body, coverColor });
     const savedBook = await newBook.save();
+    console.log('Book saved:', savedBook._id);
     
     // Log activity
     await Activity.create({
@@ -27,6 +29,7 @@ router.post('/', async (req, res) => {
       title: savedBook.title,
       description: `Added to library`
     });
+    console.log('Activity logged');
 
     res.status(201).json(savedBook);
   } catch (err) {

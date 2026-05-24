@@ -12,16 +12,26 @@ export const BookDetailModal = ({ book, isOpen, onClose, onSave, onDelete }) => 
 
   const handleSave = async () => {
     try {
-      const payload = { ...formData };
-      if (!payload.year) delete payload.year;
-      if (!payload.pages) delete payload.pages;
+      const payload = { 
+        ...formData,
+        year: formData.year ? parseInt(formData.year) : undefined,
+        pages: formData.pages ? parseInt(formData.pages) : undefined
+      };
       
+      // Clean up empty fields
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '' || payload[key] === undefined) {
+          delete payload[key];
+        }
+      });
+
       const res = await api.put(`/books/${book._id}`, payload);
       onSave(res.data);
       onClose();
     } catch (err) {
-      console.error(err);
-      alert('Failed to save changes. Please try again.');
+      console.error('Error saving book:', err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to save changes. Please try again.';
+      alert(errorMsg);
     }
   };
 
@@ -111,22 +121,39 @@ export const AddBookModal = ({ isOpen, onClose, onAdd }) => {
   if (!isOpen) return null;
 
   const handleSave = async () => {
-    if (!formData.title || !formData.author) {
+    if (!formData.title?.trim() || !formData.author?.trim()) {
       alert("Title and Author are required");
       return;
     }
     try {
-      const payload = { ...formData };
-      if (!payload.year) delete payload.year;
-      if (!payload.pages) delete payload.pages;
+      const payload = { 
+        ...formData,
+        title: formData.title.trim(),
+        author: formData.author.trim(),
+        year: formData.year ? parseInt(formData.year) : undefined,
+        pages: formData.pages ? parseInt(formData.pages) : undefined,
+        description: formData.description?.trim(),
+        coverImage: formData.coverImage?.trim()
+      };
+      
+      // Clean up empty fields
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '' || payload[key] === undefined) {
+          delete payload[key];
+        }
+      });
 
+      console.log('Adding book with payload:', payload);
       const res = await api.post('/books', payload);
+      console.log('Book added response:', res.data);
+      
       onAdd(res.data);
       setFormData({ title: '', author: '', year: '', genre: 'Fiction', pages: '', description: '', status: 'want', coverImage: '' });
       onClose();
     } catch (err) {
-      console.error(err);
-      alert('Failed to add book. Please try again.');
+      console.error('Error adding book:', err);
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to add book. Please try again.';
+      alert(errorMsg);
     }
   };
 
