@@ -2,25 +2,48 @@ import { useState, useEffect } from 'react';
 import api from '../api';
 
 export const BookDetailModal = ({ book, isOpen, onClose, onSave, onDelete }) => {
-  const [formData, setFormData] = useState({ ...book });
+  const [formData, setFormData] = useState({ 
+    title: '', author: '', year: '', genre: 'Fiction', pages: '', description: '', status: 'want', coverImage: '', rating: 0, notes: '', lentTo: '' 
+  });
 
   useEffect(() => {
-    setFormData({ ...book });
+    if (book) {
+      setFormData({ 
+        ...book,
+        year: book.year || '',
+        pages: book.pages || '',
+        description: book.description || '',
+        notes: book.notes || '',
+        coverImage: book.coverImage || '',
+        lentTo: book.lentTo || ''
+      });
+    }
   }, [book]);
 
   if (!isOpen || !book) return null;
 
   const handleSave = async () => {
+    if (!formData.title?.trim() || !formData.author?.trim()) {
+      alert("Title and Author are required");
+      return;
+    }
     try {
       const payload = { 
         ...formData,
-        year: formData.year ? parseInt(formData.year) : undefined,
-        pages: formData.pages ? parseInt(formData.pages) : undefined
+        title: formData.title.trim(),
+        author: formData.author.trim(),
+        year: formData.year && !isNaN(parseInt(formData.year)) ? parseInt(formData.year) : undefined,
+        pages: formData.pages && !isNaN(parseInt(formData.pages)) ? parseInt(formData.pages) : undefined,
+        description: formData.description?.trim(),
+        coverImage: formData.coverImage?.trim(),
+        notes: formData.notes?.trim(),
+        lentTo: formData.status === 'lent' ? formData.lentTo?.trim() : undefined
       };
       
-      // Clean up empty fields
+      // Clean up internal fields and empty values
+      const internalFields = ['_id', 'createdAt', 'updatedAt', '__v'];
       Object.keys(payload).forEach(key => {
-        if (payload[key] === '' || payload[key] === undefined) {
+        if (internalFields.includes(key) || payload[key] === '' || payload[key] === undefined) {
           delete payload[key];
         }
       });
@@ -54,13 +77,59 @@ export const BookDetailModal = ({ book, isOpen, onClose, onSave, onDelete }) => 
           <div className={`modal-cover bc-${formData.coverColor || 0}`}>
             {formData.coverImage && <img src={formData.coverImage} alt={formData.title} />}
           </div>
-          <div>
-            <h2 className="modal-book-title">{formData.title}</h2>
-            <p className="modal-book-author">{formData.author}</p>
+          <div style={{flex: 1}}>
+            <div className="form-group" style={{marginBottom: '10px'}}>
+              <input 
+                type="text" 
+                className="modal-book-title" 
+                style={{width: '100%', background: 'transparent', border: 'none', padding: 0}}
+                value={formData.title} 
+                onChange={e => setFormData({...formData, title: e.target.value})} 
+                placeholder="Title"
+              />
+              <input 
+                type="text" 
+                className="modal-book-author" 
+                style={{width: '100%', background: 'transparent', border: 'none', padding: 0, marginTop: '4px'}}
+                value={formData.author} 
+                onChange={e => setFormData({...formData, author: e.target.value})} 
+                placeholder="Author"
+              />
+            </div>
             <div className="modal-book-meta">
-              {formData.genre && <span className="modal-tag">{formData.genre}</span>}
-              {formData.year && <span className="modal-tag">{formData.year}</span>}
-              {formData.pages && <span className="modal-tag">{formData.pages} pages</span>}
+              <select 
+                className="modal-tag" 
+                style={{background: 'transparent', cursor: 'pointer', outline: 'none'}}
+                value={formData.genre} 
+                onChange={e => setFormData({...formData, genre: e.target.value})}
+              >
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Sci-Fi">Sci-Fi</option>
+                <option value="Biography">Biography</option>
+                <option value="History">History</option>
+                <option value="Romance">Romance</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Education">Education</option>
+                <option value="Other">Other</option>
+              </select>
+              <input 
+                type="number" 
+                className="modal-tag" 
+                style={{width: '70px', background: 'transparent', outline: 'none'}}
+                placeholder="Year"
+                value={formData.year} 
+                onChange={e => setFormData({...formData, year: e.target.value})}
+              />
+              <input 
+                type="number" 
+                className="modal-tag" 
+                style={{width: '90px', background: 'transparent', outline: 'none'}}
+                placeholder="Pages"
+                value={formData.pages} 
+                onChange={e => setFormData({...formData, pages: e.target.value})}
+              />
             </div>
           </div>
         </div>
@@ -68,26 +137,29 @@ export const BookDetailModal = ({ book, isOpen, onClose, onSave, onDelete }) => 
           <div className="modal-section">
             <div className="modal-section-title">Status</div>
             <div className="status-select-row">
-              <button className={`status-btn ${formData.status === 'read' ? 'active-read' : ''}`} onClick={() => setFormData({...formData, status: 'read'})}>✓ Read</button>
-              <button className={`status-btn ${formData.status === 'reading' ? 'active-reading' : ''}`} onClick={() => setFormData({...formData, status: 'reading'})}>👁 Reading</button>
-              <button className={`status-btn ${formData.status === 'want' ? 'active-want' : ''}`} onClick={() => setFormData({...formData, status: 'want'})}>🔖 Want to Read</button>
-              <button className={`status-btn ${formData.status === 'lent' ? 'active-lent' : ''}`} onClick={() => setFormData({...formData, status: 'lent'})}>↗ Lent Out</button>
+              <button type="button" className={`status-btn ${formData.status === 'read' ? 'active-read' : ''}`} onClick={() => setFormData({...formData, status: 'read'})}>✓ Read</button>
+              <button type="button" className={`status-btn ${formData.status === 'reading' ? 'active-reading' : ''}`} onClick={() => setFormData({...formData, status: 'reading'})}>👁 Reading</button>
+              <button type="button" className={`status-btn ${formData.status === 'want' ? 'active-want' : ''}`} onClick={() => setFormData({...formData, status: 'want'})}>🔖 Want to Read</button>
+              <button type="button" className={`status-btn ${formData.status === 'lent' ? 'active-lent' : ''}`} onClick={() => setFormData({...formData, status: 'lent'})}>↗ Lent Out</button>
             </div>
           </div>
           <div className="modal-section">
             <div className="modal-section-title">My Rating</div>
             <div className="star-rating">
               {[1,2,3,4,5].map(r => (
-                <button key={r} className={`star-btn ${r <= (formData.rating || 0) ? 'lit' : ''}`} onClick={() => setFormData({...formData, rating: r})}>★</button>
+                <button key={r} type="button" className={`star-btn ${r <= (formData.rating || 0) ? 'lit' : ''}`} onClick={() => setFormData({...formData, rating: r})}>★</button>
               ))}
             </div>
           </div>
-          {formData.description && (
-            <div className="modal-section">
-              <div className="modal-section-title">Description</div>
-              <p>{formData.description}</p>
-            </div>
-          )}
+          <div className="modal-section">
+            <div className="modal-section-title">Description</div>
+            <textarea 
+              className="notes-area" 
+              placeholder="Brief description or synopsis…" 
+              value={formData.description} 
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+            ></textarea>
+          </div>
           <div className="modal-section">
             <div className="modal-section-title">My Notes</div>
             <textarea className="notes-area" placeholder="Add personal notes, quotes, or thoughts…" value={formData.notes || ''} onChange={(e) => setFormData({...formData, notes: e.target.value})}></textarea>
@@ -130,10 +202,11 @@ export const AddBookModal = ({ isOpen, onClose, onAdd }) => {
         ...formData,
         title: formData.title.trim(),
         author: formData.author.trim(),
-        year: formData.year ? parseInt(formData.year) : undefined,
-        pages: formData.pages ? parseInt(formData.pages) : undefined,
+        year: formData.year && !isNaN(parseInt(formData.year)) ? parseInt(formData.year) : undefined,
+        pages: formData.pages && !isNaN(parseInt(formData.pages)) ? parseInt(formData.pages) : undefined,
         description: formData.description?.trim(),
-        coverImage: formData.coverImage?.trim()
+        coverImage: formData.coverImage?.trim(),
+        lentTo: formData.status === 'lent' ? formData.lentTo?.trim() : undefined
       };
       
       // Clean up empty fields
@@ -143,12 +216,9 @@ export const AddBookModal = ({ isOpen, onClose, onAdd }) => {
         }
       });
 
-      console.log('Adding book with payload:', payload);
       const res = await api.post('/books', payload);
-      console.log('Book added response:', res.data);
-      
       onAdd(res.data);
-      setFormData({ title: '', author: '', year: '', genre: 'Fiction', pages: '', description: '', status: 'want', coverImage: '' });
+      setFormData({ title: '', author: '', year: '', genre: 'Fiction', pages: '', description: '', status: 'want', coverImage: '', lentTo: '' });
       onClose();
     } catch (err) {
       console.error('Error adding book:', err);
@@ -221,6 +291,12 @@ export const AddBookModal = ({ isOpen, onClose, onAdd }) => {
                 <option value="lent">Lent Out</option>
               </select>
             </div>
+            {formData.status === 'lent' && (
+              <div className="form-group form-full">
+                <label>Lent To</label>
+                <input type="text" placeholder="Borrower's name" value={formData.lentTo || ''} onChange={e => setFormData({...formData, lentTo: e.target.value})} />
+              </div>
+            )}
           </div>
         </div>
         <div className="modal-footer">
